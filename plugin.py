@@ -106,8 +106,8 @@ except ImportError as e:
 
 import urllib.request                   #for name hack via JSON-API Call
 
-sys.path
-sys.path.append('/usr/lib/python3/dist-packages')
+# sys.path
+# sys.path.append('/usr/lib/python3/dist-packages')
 # sys.path.append('/volume1/@appstore/python3/lib/python3.5/site-packages')
 # sys.path.append('/volume1/@appstore/py3k/usr/local/lib/python3.5/site-packages')
 # sys.path.append('C:\\Program Files (x86)\\Python37-32\\Lib\\site-packages')
