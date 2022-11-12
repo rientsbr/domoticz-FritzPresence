@@ -59,7 +59,7 @@ Person Images are from [DomoticzIcons](https://drive.google.com/folderview?id=0B
     - clone the project
         ```bash
         cd domoticz/plugins
-        git clone https://github.com/belzetrigger/domoticz-FritzPresence.git
+        git clone https://github.com/rientsbr/domoticz-FritzPresence.git
         ```
 - or just download, unzip and copy to `domoticz/plugins` 
 - optional: adapt naming convention
