@@ -36,9 +36,7 @@ class PresDevice:
         [type] -- [description]
     """
 
-    def __init__(
-        self, macAddress: str, defaultName: str = None, cooldownperiod: int = 30
-    ):
+    def __init__(self, macAddress: str, defaultName: str = None, cooldownperiod: int = 30):
         self.cooldownperiod = cooldownperiod
         self.macAddress = macAddress
         self.defaultName = defaultName
