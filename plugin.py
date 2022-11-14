@@ -1,23 +1,24 @@
 # plugin for fritz box
 #
 # Author: belze
+# Aangepast door Rients Brandsma
 #
 
 
 """
-<plugin key="FritzPresence" name="Fritz!Presence Plugin"
-    author="belze" version="0.7.0" 
-    externallink="https://github.com/belzetrigger/domoticz-FritzPresence" >
-    
-    <!--    
+<plugin key="FritzPresence" name="FritzBox!Presence Plugin"
+    author="belze/Rients" version="0.8.0"
+    externallink="https://github.com/rientsbr/domoticz-FritzPresence" >
+
+    <!--
     wikilink="http://www.domoticz.com/wiki/plugins/plugin.html"
     //-->
     <description>
         <h2>Fritz!Presence</h2><br/>
-        Does two things. Mainly adds your IT devices known by your Fritz!Box to 
+        Does two things. Mainly adds your IT devices known by your Fritz!Box to
         domoticz and shows the current status.
-        So you can determine the presence of people if for example mobile phone is connected. 
-        Or check if hardware is still a live. 
+        So you can determine the presence of people if for example mobile phone is connected.
+        Or check if hardware is still a live.
         <h3>Features</h3>
         <ul style="list-style-type:square">
             <li>uses router information to show state of a device.</li>
@@ -43,7 +44,7 @@
            </li>
            <li>based on device names, this plugin tries to add differant images - if using admin panel</li>
            <li>WOL: send magic packets to your ethernet device</li>
-           
+
         </ul>
         <h3>Devices</h3>
         for each MAC address there will be one device generated
@@ -75,14 +76,12 @@
                 <option label="False" value="Normal"  default="False" />
             </options>
         </param>
-        
+
     </params>
 </plugin>
 """
 from blz import blzHelperInterface
 import re
-
-#BLZ 2021-04-21: new lib for renamin work around via JSON-API
 import urllib
 # import datetime as dt
 from datetime import datetime, timedelta
@@ -90,14 +89,11 @@ import sys
 from typing import List
 try:
     import Domoticz
-except ImportError:
+except ImportError:                         # Als er een fout bij het importeren van Domoticz onstaat
     from blz import fakeDomoticz as Domoticz
     from blz.fakeDomoticz import Parameters
     from blz.fakeDomoticz import Devices
     from blz.fakeDomoticz import Images
-
-#from blz.blzHelperInterface import BlzHelperInterface
-
 
 try:
     from fritzhelper.fritzHelper import FritzHelper
@@ -174,7 +170,7 @@ class BasePlugin:
     def onStart(self):
         if Parameters["Mode6"] == 'Debug':
             self.debug = True
-            Domoticz.Debugging(1)
+            Domoticz.Debugging(1)           # All Debugging
             DumpConfigToLog()
         else:
             Domoticz.Debugging(0)
@@ -212,7 +208,7 @@ class BasePlugin:
             Domoticz.Log("Mac Addresses are empty. Use admin switch to add.")
         else:
             self.macList = Parameters["Mode5"].split(';')
-            # BLZ 2021-04-20: Test without names, just use macs .... 
+            # BLZ 2021-04-20: Test without names, just use macs ....
             # we would update name later with hostname from fritz box anyway
             Domoticz.Debug("Now we just use MAC as names for init, should replaced later with name from Fritz!Box.")
             self.nameList = Parameters["Mode5"].split(';')
@@ -226,7 +222,7 @@ class BasePlugin:
             # else:
             #    Domoticz.Error("No Names defined in configuration. Using mac addresses first.")
             #    self.nameList = Parameters["Mode5"].split(';')
-        
+
         self.defName = None
 
         # check images
@@ -257,7 +253,7 @@ class BasePlugin:
             #    devName = self.nameList[i]
             #else:
             #    devName = "{}_{}".format(Parameters['Name'], self.macList[i])
-            
+
             # Check if devices need to be created
             createDevice(unit=i + UNIT_DEV_START_IDX, devName=mac, devId=mac)
             # init with empty data
@@ -352,7 +348,7 @@ class BasePlugin:
         """[summary]
 
         Arguments:
-            hosts {dict} -- list of hosts should came from fritzhelper or fritzconnection we 
+            hosts {dict} -- list of hosts should came from fritzhelper or fritzconnection we
                             need at least mac, status, name
         """
         for host in hosts:
@@ -437,14 +433,14 @@ class BasePlugin:
                         mac = Devices[x].DeviceID
                         name = self.fritz.getDeviceName(mac)
                         Domoticz.Debug("nr {} mac {} name {}".format(x, mac, name))
-                        
+
                         if self.fritz.needsUpdate(mac) is True:
                             connected = 1
                             if(self.fritz.isDeviceConnected(mac) is False):
                                 connected = 0
                             updateDeviceByDevId(mac, connected, "", "",
                                                 name)
-                        if(name != Devices[x].Name):                             
+                        if(name != Devices[x].Name):
                             url = "http://localhost:{}/json.htm?param=renamedevice&type=command&idx={}&name={}".format(Parameters['Port'],Devices[x].ID,name)
                             Domoticz.Debug("BLZ: new name!  call: {}".format(url))
                             contents = urllib.request.urlopen(url).read()
@@ -631,8 +627,8 @@ def createDevice(unit: int, devName: str, devId: str, image: str = ICON_PERSON):
             unit, devId))
     else:
         Domoticz.Error("BLZ:createDevice: Should never happen, as we double checked before.... But looks like unit {} is already used by {}.".format(unit, Devices[unit].Name) )
-        
-        
+
+
     return unit
 
 
@@ -725,4 +721,3 @@ def updateImageByUnit(Unit: int, picture):
         for image in Images:
             Domoticz.Error("Image: {} id: {} name: {}".format(image, Images[image].ID, Images[image].Name))
     return
-
