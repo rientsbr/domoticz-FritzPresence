@@ -1,13 +1,13 @@
-# plugin for fritz box
-#
-# Author: belze
-# Aangepast door Rients Brandsma
+# Domoticz Plugin to get status from FritzBox 
+# Used as Presence for devices.
+# Original made by Belze
+# Author: Rients Brandsma
 #
 
 
 """
-<plugin key="FritzPresence" name="FritzBox!Presence Plugin"
-    author="belze/Rients" version="0.8.0"
+<plugin key="FritzBoxPresence" name="FritzBox!Presence Plugin"
+    author="Rients Brandsma" version="0.0.1"
     externallink="https://github.com/rientsbr/domoticz-FritzPresence" >
 
     <!--
@@ -167,6 +167,7 @@ class BasePlugin:
 
         return
 
+    # This routine is called when the hardware starts.
     def onStart(self):
         if Parameters["Mode6"] == 'Debug':
             self.debug = True
@@ -174,24 +175,23 @@ class BasePlugin:
             DumpConfigToLog()
         else:
             Domoticz.Debugging(0)
-
         Domoticz.Log("onStart called")
 
         # check polling interval parameter
         try:
-            temp = int(Parameters["Mode4"])
+            interval = int(Parameters["Mode4"])
         except:
             Domoticz.Error("Invalid polling interval parameter")
         else:
-            if temp < 1:
-                temp = 1  # minimum polling interval
+            if interval < 1:
+                interval = 1  # minimum polling interval
                 Domoticz.Error(
                     "Specified polling interval too short: changed to one minutes")
-            elif temp > (60):
-                temp = (60)  # maximum polling interval is 1 hour
+            elif interval > (60):
+                interval = (60)  # maximum polling interval is 1 hour
                 Domoticz.Error(
                     "Specified polling interval too long: changed to 1 hour")
-            self.pollinterval = temp * 60
+            self.pollinterval = interval * 60
         Domoticz.Log("Using polling interval of {} seconds".format(
             str(self.pollinterval)))
 
@@ -203,26 +203,13 @@ class BasePlugin:
             Domoticz.Error("No username / password set - please update setting.")
             raise ValueError("Username and password must be given.")
 
-        # MAC Addresses
+        # Are MAC adresses defined on the settings screen.
         if(not Parameters["Mode5"]):
             Domoticz.Log("Mac Addresses are empty. Use admin switch to add.")
         else:
-            self.macList = Parameters["Mode5"].split(';')
-            # BLZ 2021-04-20: Test without names, just use macs ....
-            # we would update name later with hostname from fritz box anyway
+            self.macList = Parameters["Mode5"].split(';') 
             Domoticz.Debug("Now we just use MAC as names for init, should replaced later with name from Fritz!Box.")
             self.nameList = Parameters["Mode5"].split(';')
-            # just for security
-            # if(Parameters['Name'] is not None):
-            #    self.nameList = Parameters['Name'].split(';')
-            #    # just for quality
-            #    if(len(self.nameList) != len(self.macList)):
-            #        Domoticz.Error("Amount of Names does not fit defined addresses. Use now MAC Address as names.")
-            #        self.nameList = Parameters["Mode5"].split(';')
-            # else:
-            #    Domoticz.Error("No Names defined in configuration. Using mac addresses first.")
-            #    self.nameList = Parameters["Mode5"].split(';')
-
         self.defName = None
 
         # check images
@@ -249,19 +236,10 @@ class BasePlugin:
             if not blzHelperInterface.isValidMAC(mac):
                 Domoticz.Error("Invalid MAC Address on index {}='{}' skip this entry.".format(i, mac))
                 continue
-            #if(self.nameList[i]):
-            #    devName = self.nameList[i]
-            #else:
-            #    devName = "{}_{}".format(Parameters['Name'], self.macList[i])
-
-            # Check if devices need to be created
             createDevice(unit=i + UNIT_DEV_START_IDX, devName=mac, devId=mac)
-            # init with empty data
             updateDeviceByDevId(devId=mac, alarmLevel=0, alarmData="No Data jet", name=mac)
-            # BLZ: 2021-04-19: removed to avoid overwriting custom images see issue#2
-            # updateImageByDevId(self.macList[i], ICON_PERSON)
 
-        # blz: test first init, after that get helper
+            # blz: test first init, after that get helper
         self.fritz = FritzHelper(self.host, self.user, self.password,
                                  self.macList)
         if self.debug is True and self.fritz is not None:
