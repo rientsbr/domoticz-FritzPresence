@@ -179,16 +179,12 @@ class BasePlugin:
         else:
             if interval < 1:
                 interval = 1  # minimum polling interval
-                Domoticz.Error(
-                    "Specified polling interval too short: changed to one minutes")
+                Domoticz.Error("Specified polling interval too short: changed to one minutes")
             elif interval > (60):
                 interval = (60)  # maximum polling interval is 1 hour
-                Domoticz.Error(
-                    "Specified polling interval too long: changed to 1 hour")
+                Domoticz.Error("Specified polling interval too long: changed to 1 hour")
             self.pollinterval = interval * 60
-        Domoticz.Log("Using polling interval of {} seconds".format(
-            str(self.pollinterval)))
-
+#        Domoticz.Log("Using polling interval of {} seconds".format(str(self.pollinterval)))
         self.host = Parameters["Mode1"]
         self.user = Parameters["Username"]
         self.password = Parameters["Password"]
